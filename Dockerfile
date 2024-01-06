@@ -59,12 +59,12 @@ ENV PATH="/app/python/bin:$PATH" \
 ### 3rd party minifiers ###
 
 # Bash-minifier #
-FROM --platform=$BUILDPLATFORM gitman-reusable AS bash-minifier-build1
+FROM --platform=$BUILDPLATFORM gitman-reusable AS minifiers-bash-build
 COPY minifiers/gitman/bash-minifier/gitman.yml ./
 RUN --mount=type=cache,target=/root/.gitcache \
     gitman install --quiet
 
-FROM --platform=$BUILDPLATFORM debian:12.4-slim AS bash-minifier-build2
+FROM --platform=$BUILDPLATFORM debian:12.4-slim AS minifiers-bash-final
 WORKDIR /app
 COPY --from=bash-minifier-build1 /app/gitman/bash-minifier ./bash-minifier/
 
