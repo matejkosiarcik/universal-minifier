@@ -7,9 +7,8 @@
 # hadolint global ignore=DL3042
 # ^^^ Allow pip's cache, because we use it for cache mount
 
-### CLI ###
+### Main CLI ###
 
-# Main CLI #
 FROM --platform=$BUILDPLATFORM node:21.5.0-slim AS cli-build
 WORKDIR /app
 RUN apt-get update -qq && \
@@ -42,7 +41,32 @@ COPY --from=cli-build /app/dist/ ./dist/
 COPY docker-utils/sanity-checks/check-minifiers-custom.sh /utils/check-minifiers-custom.sh
 RUN chronic sh /utils/check-minifiers-custom.sh
 
+### Reusable components ###
+
+# Gitman #
+FROM --platform=$BUILDPLATFORM debian:12.4-slim AS gitman-reusable
+WORKDIR /app
+RUN apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive DEBCONF_TERSE=yes DEBCONF_NOWARNINGS=yes apt-get install -qq --yes --no-install-recommends \
+        python3 python3-pip git >/dev/null && \
+    rm -rf /var/lib/apt/lists/*
+COPY docker-utils/dependencies/gitman/requirements.txt ./
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install --requirement requirements.txt --target python --quiet
+ENV PATH="/app/python/bin:$PATH" \
+    PYTHONPATH=/app/python
+
 ### 3rd party minifiers ###
+
+# Bash-minifier #
+FROM --platform=$BUILDPLATFORM gitman-reusable AS bash-minifier-build1
+COPY minifiers/gitman/bash-minifier/gitman.yml ./
+RUN --mount=type=cache,target=/root/.gitcache \
+    gitman install --quiet
+
+FROM --platform=$BUILDPLATFORM debian:12.4-slim AS bash-minifier-build2
+WORKDIR /app
+COPY --from=bash-minifier-build1 /app/gitman/bash-minifier ./bash-minifier/
 
 # NodeJS/NPM #
 
