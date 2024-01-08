@@ -66,7 +66,7 @@ RUN --mount=type=cache,target=/root/.gitcache \
 
 FROM --platform=$BUILDPLATFORM debian:12.4-slim AS minifiers-bash-final
 WORKDIR /app
-COPY --from=bash-minifier-build1 /app/gitman/bash-minifier ./bash-minifier/
+COPY --from=minifiers-bash-build1 /app/gitman/bash-minifier ./bash-minifier/
 
 # TODO: Run sanity check and remove files which are unused (inotifywait)
 
