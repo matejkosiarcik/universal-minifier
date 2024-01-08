@@ -1,7 +1,6 @@
 #!/bin/sh
 set -euf
 
-# YAML Minifier
 tmpdir="$(mktemp -d)"
 
 yq --version >/dev/null
