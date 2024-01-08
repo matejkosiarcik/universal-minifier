@@ -1,6 +1,6 @@
 #!/bin/sh
 set -euf
 
-tmpdir="$(mktemp -d)"
+# tmpdir="$(mktemp -d)"
 
-sh "${BINPREFIX:-}Minify.sh"
+# sh "${BINPREFIX:-}Minify.sh"
